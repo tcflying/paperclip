@@ -857,18 +857,12 @@ async function resolveSpawnTarget(
     return { command: executable, args };
   }
 
-  if (/\.(cmd|bat)$/i.test(executable)) {
-    // Always use cmd.exe for .cmd/.bat wrappers. Some environments override
-    // ComSpec to PowerShell, which breaks cmd-specific flags like /d /s /c.
-    const shell = resolveWindowsCmdShell(env);
-    const commandLine = [quoteForCmd(executable), ...args.map(quoteForCmd)].join(" ");
-    return {
-      command: shell,
-      args: ["/d", "/s", "/c", commandLine],
-    };
-  }
-
-  return { command: executable, args };
+  const shell = resolveWindowsCmdShell(env);
+  const commandLine = [quoteForCmd(executable), ...args.map(quoteForCmd)].join(" ");
+  return {
+    command: shell,
+    args: ["/d", "/s", "/c", `chcp 65001 >nul & ${commandLine}`],
+  };
 }
 
 export function ensurePathInEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
