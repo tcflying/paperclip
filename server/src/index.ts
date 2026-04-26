@@ -6,7 +6,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { pathToFileURL } from "node:url";
 import type { Request as ExpressRequest, RequestHandler } from "express";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import {
   createDb,
   ensurePostgresDatabase,
@@ -439,8 +439,15 @@ export async function startServer(): Promise<StartedServer> {
     activeDatabaseConnectionString = embeddedConnectionString;
     resolvedEmbeddedPostgresPort = port;
     startupDbInfo = { mode: "embedded-postgres", dataDir, port };
-  }
-  
+
+    setInterval(() => {
+      db!.execute(sql`SELECT 1`).catch((err: unknown) => {
+        logger.error({ err }, "Embedded PostgreSQL health check failed - process may have died");
+        console.error("POSTGRES HEALTH CHECK FAILED:", err);
+      });
+    }, 60000);
+   }
+
   if (config.deploymentMode === "local_trusted" && !isLoopbackHost(config.host)) {
     throw new Error(
       `local_trusted mode requires loopback host binding (received: ${config.host}). ` +
@@ -874,6 +881,23 @@ function isMainModule(metaUrl: string): boolean {
     return false;
   }
 }
+
+process.on("uncaughtException", (err) => {
+  const code = (err as NodeJS.ErrnoException).code;
+  if (code === "EPIPE") {
+    logger.warn({ err }, "Ignored EPIPE (broken pipe write)");
+    return;
+  }
+  logger.error({ err }, "Uncaught exception - server crashing");
+  console.error("UNCAUGHT EXCEPTION:", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error({ reason, promise }, "Unhandled rejection - server crashing");
+  console.error("UNHANDLED REJECTION:", reason);
+  process.exit(1);
+});
 
 if (isMainModule(import.meta.url)) {
   void startServer().catch((err) => {

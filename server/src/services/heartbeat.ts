@@ -879,9 +879,16 @@ export function summarizeHeartbeatRunListResultJson(input: {
 }
 
 function summarizeRunFailureForIssueComment(
-  run: Pick<typeof heartbeatRuns.$inferSelect, "error" | "errorCode"> | null | undefined,
+  run: Pick<typeof heartbeatRuns.$inferSelect, "error" | "errorCode" | "status" | "livenessState"> | null | undefined,
 ) {
   if (!run) return null;
+
+  if (run.status === "succeeded" && run.livenessState) {
+    const stallState = run.livenessState as RunLivenessState;
+    if (STALL_LIVENESS_STATES.has(stallState)) {
+      return ` Last run succeeded with liveness \`${stallState}\` (no concrete progress).`;
+    }
+  }
 
   const errorCode = readNonEmptyString(run.errorCode)?.trim() ?? null;
   const rawError = readNonEmptyString(run.error)?.trim() ?? null;
@@ -902,20 +909,46 @@ function summarizeRunFailureForIssueComment(
   return null;
 }
 
+const STALL_LIVENESS_STATES = new Set<RunLivenessState>([
+  "needs_followup",
+  "empty_response",
+  "plan_only",
+]);
+
 function didAutomaticRecoveryFail(
-  latestRun: Pick<typeof heartbeatRuns.$inferSelect, "status" | "contextSnapshot"> | null,
+  latestRun: Pick<
+    typeof heartbeatRuns.$inferSelect,
+    "status" | "error" | "errorCode" | "contextSnapshot" | "invocationSource" | "livenessState"
+  > | null,
   expectedRetryReason: "assignment_recovery" | "issue_continuation_needed",
 ) {
   if (!latestRun) return false;
 
   const latestContext = parseObject(latestRun.contextSnapshot);
   const latestRetryReason = readNonEmptyString(latestContext.retryReason);
-  return (
+  const isExpectedRecovery =
     latestRetryReason === expectedRetryReason &&
+    (latestRun.invocationSource === "automation" || latestRun.invocationSource === "timer");
+
+  if (
+    isExpectedRecovery &&
     UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES.includes(
       latestRun.status as (typeof UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES)[number],
     )
-  );
+  ) {
+    return true;
+  }
+
+  if (
+    isExpectedRecovery &&
+    latestRun.status === "succeeded" &&
+    latestRun.livenessState != null &&
+    STALL_LIVENESS_STATES.has(latestRun.livenessState as RunLivenessState)
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 function normalizeLedgerBillingType(value: unknown): BillingType {
@@ -3953,6 +3986,8 @@ export function heartbeatService(db: Db) {
         error: heartbeatRuns.error,
         errorCode: heartbeatRuns.errorCode,
         contextSnapshot: heartbeatRuns.contextSnapshot,
+        invocationSource: heartbeatRuns.invocationSource,
+        livenessState: heartbeatRuns.livenessState,
       })
       .from(heartbeatRuns)
       .where(
@@ -5961,7 +5996,7 @@ export function heartbeatService(db: Db) {
 
   function buildImmediateExecutionPathRecoveryComment(input: {
     status: "todo" | "in_progress";
-    latestRun: Pick<typeof heartbeatRuns.$inferSelect, "error" | "errorCode"> | null | undefined;
+    latestRun: Pick<typeof heartbeatRuns.$inferSelect, "error" | "errorCode" | "status" | "livenessState"> | null | undefined;
   }) {
     const failureSummary = summarizeRunFailureForIssueComment(input.latestRun);
     if (input.status === "todo") {
