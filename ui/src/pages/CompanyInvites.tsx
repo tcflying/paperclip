@@ -251,16 +251,16 @@ export function CompanyInvites() {
                 This URL includes the current Paperclip domain returned by the server.
               </div>
             </div>
-            <button
-              type="button"
+            <div
+              role="button"
               onClick={async () => {
                 const copied = await copyInviteUrl(latestInviteUrl);
                 setLatestInviteCopied(copied);
               }}
-              className="w-full rounded-md border border-border bg-muted/60 px-3 py-2 text-left text-sm break-all transition-colors hover:bg-background"
+              className="w-full cursor-pointer rounded-md border border-border bg-muted/60 px-3 py-2 text-left text-sm break-all transition-colors hover:bg-background select-all"
             >
               {latestInviteUrl}
-            </button>
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" asChild>
                 <a href={latestInviteUrl} target="_blank" rel="noreferrer">
