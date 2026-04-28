@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { History } from "lucide-react";
+import { t } from "../locales";
 
 const ACTIVITY_PAGE_LIMIT = 200;
 
@@ -49,7 +50,7 @@ export function Activity() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Activity" }]);
+    setBreadcrumbs([{ label: t("nav.activity") }]);
   }, [setBreadcrumbs]);
 
   const { data, isLoading, error } = useQuery({

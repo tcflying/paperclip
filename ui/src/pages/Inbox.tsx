@@ -61,6 +61,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import { approvalLabel, defaultTypeIcon, typeIcon } from "../components/ApprovalPayload";
 import { timeAgo } from "../lib/timeAgo";
 import { Button } from "@/components/ui/button";
+import { t } from "../locales";
 import {
   Dialog,
   DialogContent,
@@ -723,7 +724,7 @@ export function Inbox() {
   });
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Inbox" }]);
+    setBreadcrumbs([{ label: t("nav.inbox") }]);
   }, [setBreadcrumbs]);
 
   useEffect(() => {

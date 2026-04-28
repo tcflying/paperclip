@@ -27,6 +27,7 @@ import {
   DollarSign,
   Calendar,
 } from "lucide-react";
+import { t } from "../locales";
 
 export function Companies() {
   const {
@@ -69,7 +70,7 @@ export function Companies() {
   });
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Companies" }]);
+    setBreadcrumbs([{ label: t("nav.companies") }]);
   }, [setBreadcrumbs]);
 
   function startEdit(companyId: string, currentName: string) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BookOpen,
+  Globe,
   LogOut,
   type LucideIcon,
   Moon,
@@ -16,12 +17,33 @@ import { authApi } from "@/api/auth";
 import { queryKeys } from "@/lib/queryKeys";
 import { useSidebar } from "../context/SidebarContext";
 import { useTheme } from "../context/ThemeContext";
+import { locales, setLocale, getLocale, type Locale, t } from "../locales";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "../lib/utils";
 
 const PROFILE_SETTINGS_PATH = "/instance/settings/profile";
 const DOCS_URL = "https://docs.paperclip.ing/";
+const SIGNED_IN_TEXT = t("auth.signedIn");
+const LOCAL_TEXT = t("auth.localWorkspace");
+const ACCOUNT_TEXT = t("auth.account");
+const LOCAL_ACCOUNT_TEXT = t("auth.localAccount");
+const VIEW_PROFILE_TEXT = t("sidebar.viewProfile");
+const VIEW_PROFILE_DESC = t("sidebar.viewProfileDesc");
+const EDIT_PROFILE_TEXT = t("sidebar.editProfile");
+const EDIT_PROFILE_DESC = t("sidebar.editProfileDesc");
+const INSTANCE_SETTINGS_TEXT = t("sidebar.instanceSettings");
+const INSTANCE_SETTINGS_DESC = t("sidebar.instanceSettingsDesc");
+const DOCUMENTATION_TEXT = t("sidebar.documentation");
+const DOCUMENTATION_DESC = t("sidebar.documentationDesc");
+const SWITCH_LIGHT_MODE_TEXT = t("sidebar.switchToLight");
+const SWITCH_DARK_MODE_TEXT = t("sidebar.switchToDark");
+const SWITCH_MODE_DESC = t("sidebar.toggleAppearance");
+const LANGUAGE_TEXT = t("sidebar.language");
+const LANGUAGE_DESC = t("sidebar.switchLanguage");
+const SIGNING_OUT_TEXT = t("sidebar.signingOut");
+const SIGN_OUT_TEXT = t("sidebar.signOut");
+const SIGN_OUT_DESC = t("sidebar.endSession");
 
 interface SidebarAccountMenuProps {
   deploymentMode?: DeploymentMode;
@@ -112,6 +134,7 @@ export function SidebarAccountMenu({
   const queryClient = useQueryClient();
   const { isMobile, setSidebarOpen } = useSidebar();
   const { theme, toggleTheme } = useTheme();
+  const [language, setLanguage] = useState<Locale>(getLocale());
   const open = controlledOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const { data: session } = useQuery({
@@ -130,8 +153,8 @@ export function SidebarAccountMenu({
 
   const displayName = session?.user.name?.trim() || "Board";
   const secondaryLabel =
-    session?.user.email?.trim() || (deploymentMode === "authenticated" ? "Signed in" : "Local workspace board");
-  const accountBadge = deploymentMode === "authenticated" ? "Account" : "Local";
+    session?.user.email?.trim() || (deploymentMode === "authenticated" ? t("auth.signedIn") : t("auth.localWorkspace"));
+  const accountBadge = deploymentMode === "authenticated" ? t("auth.account") : t("auth.localAccount");
   const initials = deriveInitials(displayName);
   const profileHref = `/u/${deriveUserSlug(session?.user.name, session?.user.email, session?.user.id)}`;
 
@@ -187,40 +210,51 @@ export function SidebarAccountMenu({
 
             <div className="mt-4 space-y-1">
               <MenuAction
-                label="View profile"
-                description="Open your activity, task, and usage ledger."
+                label={VIEW_PROFILE_TEXT}
+                description={VIEW_PROFILE_DESC}
                 icon={UserRound}
                 href={profileHref}
                 onClick={closeNavigationChrome}
               />
               <MenuAction
-                label="Edit profile"
-                description="Update your display name and avatar."
+                label={EDIT_PROFILE_TEXT}
+                description={EDIT_PROFILE_DESC}
                 icon={UserRoundPen}
                 href={PROFILE_SETTINGS_PATH}
                 onClick={closeNavigationChrome}
               />
               <MenuAction
-                label="Instance settings"
-                description="Jump back to the last settings page you opened."
+                label={INSTANCE_SETTINGS_TEXT}
+                description={INSTANCE_SETTINGS_DESC}
                 icon={Settings}
                 href={instanceSettingsTarget}
                 onClick={closeNavigationChrome}
               />
               <MenuAction
-                label="Documentation"
-                description="Open Paperclip docs in a new tab."
+                label={DOCUMENTATION_TEXT}
+                description={DOCUMENTATION_DESC}
                 icon={BookOpen}
                 href={DOCS_URL}
                 external
                 onClick={() => setOpen(false)}
               />
               <MenuAction
-                label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                description="Toggle the app appearance."
+                label={theme === "dark" ? SWITCH_LIGHT_MODE_TEXT : SWITCH_DARK_MODE_TEXT}
+                description={SWITCH_MODE_DESC}
                 icon={theme === "dark" ? Sun : Moon}
                 onClick={() => {
                   toggleTheme();
+                  setOpen(false);
+                }}
+              />
+              <MenuAction
+                label={`${LANGUAGE_TEXT}: ${language === "zh" ? "中文" : "English"}`}
+                description={LANGUAGE_DESC}
+                icon={Globe}
+                onClick={() => {
+                  const nextLang: Locale = language === "zh" ? "en" : "zh";
+                  setLanguage(nextLang);
+                  setLocale(nextLang);
                   setOpen(false);
                 }}
               />
@@ -239,10 +273,10 @@ export function SidebarAccountMenu({
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium text-foreground">
-                      {signOutMutation.isPending ? "Signing out..." : "Sign out"}
+                      {signOutMutation.isPending ? SIGNING_OUT_TEXT : SIGN_OUT_TEXT}
                     </span>
                     <span className="block text-xs text-muted-foreground">
-                      End this browser session.
+                      {SIGN_OUT_DESC}
                     </span>
                   </span>
                 </button>

@@ -10,6 +10,7 @@ import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { Button } from "@/components/ui/button";
 import { Target, Plus } from "lucide-react";
+import { t } from "../locales";
 
 export function Goals() {
   const { selectedCompanyId } = useCompany();
@@ -17,7 +18,7 @@ export function Goals() {
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Goals" }]);
+    setBreadcrumbs([{ label: t("nav.goals") }]);
   }, [setBreadcrumbs]);
 
   const { data: goals, isLoading, error } = useQuery({

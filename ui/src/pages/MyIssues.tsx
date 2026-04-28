@@ -11,13 +11,14 @@ import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { formatDate } from "../lib/utils";
 import { ListTodo } from "lucide-react";
+import { t } from "../locales";
 
 export function MyIssues() {
   const { selectedCompanyId } = useCompany();
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "My Issues" }]);
+    setBreadcrumbs([{ label: t("myIssues.title") }]);
   }, [setBreadcrumbs]);
 
   const { data: issues, isLoading, error } = useQuery({

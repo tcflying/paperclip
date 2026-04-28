@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { useBreadcrumbs } from "@/context/BreadcrumbContext";
 import { useCompany } from "@/context/CompanyContext";
 import { useToast } from "@/context/ToastContext";
+import { t } from "../locales";
 import { queryKeys } from "@/lib/queryKeys";
 
 const permissionLabels: Record<PermissionKey, string> = {
@@ -71,9 +72,9 @@ export function CompanyAccess() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
-      { label: "Settings", href: "/company/settings" },
-      { label: "Access" },
+      { label: selectedCompany?.name ?? t("company.name"), href: "/dashboard" },
+      { label: t("company.settings"), href: "/company/settings" },
+      { label: t("company.access") },
     ]);
   }, [selectedCompany?.name, setBreadcrumbs]);
 
@@ -232,20 +233,20 @@ export function CompanyAccess() {
   }, [removingMember]);
 
   if (!selectedCompanyId) {
-    return <div className="text-sm text-muted-foreground">Select a company to manage access.</div>;
+    return <div className="text-sm text-muted-foreground">{t("companyAccess.selectCompany")}</div>;
   }
 
   if (membersQuery.isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading company access…</div>;
+    return <div className="text-sm text-muted-foreground">{t("companyAccess.loading")}</div>;
   }
 
   if (membersQuery.error) {
     const message =
       membersQuery.error instanceof ApiError && membersQuery.error.status === 403
-        ? "You do not have permission to manage company members."
+        ? t("companyAccess.noPermission")
         : membersQuery.error instanceof Error
           ? membersQuery.error.message
-          : "Failed to load company members.";
+          : t("companyAccess.loadFailed");
     return <div className="text-sm text-destructive">{message}</div>;
   }
 
@@ -271,10 +272,10 @@ export function CompanyAccess() {
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-lg font-semibold">Company Access</h1>
+          <h1 className="text-lg font-semibold">{t("companyAccess.title")}</h1>
         </div>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          Manage company user memberships, membership status, and explicit permission grants for {selectedCompany?.name}.
+          {t("companyAccess.desc", { name: selectedCompany?.name ?? "" })}
         </p>
       </div>
 
@@ -288,7 +289,7 @@ export function CompanyAccess() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-base font-semibold">Humans</h2>
+            <h2 className="text-base font-semibold">{t("companyAccess.humans")}</h2>
           </div>
           <p className="max-w-3xl text-sm text-muted-foreground">
             Manage human company memberships, status, and grants here.
@@ -566,7 +567,7 @@ export function CompanyAccess() {
                       </optgroup>
                     ) : null}
                     {activeReassignmentAgents.length > 0 ? (
-                      <optgroup label="Agents">
+                      <optgroup label={t("nav.agents")}>
                         {activeReassignmentAgents.map((agent) => (
                           <option key={agent.id} value={`agent:${agent.id}`}>
                             {agent.name} ({agent.role})

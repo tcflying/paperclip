@@ -12,6 +12,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { ShieldCheck } from "lucide-react";
 import { ApprovalCard } from "../components/ApprovalCard";
 import { PageSkeleton } from "../components/PageSkeleton";
+import { t } from "../locales";
 
 type StatusFilter = "pending" | "all";
 
@@ -26,7 +27,7 @@ export function Approvals() {
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Approvals" }]);
+    setBreadcrumbs([{ label: t("approvals.title") }]);
   }, [setBreadcrumbs]);
 
   const { data, isLoading, error } = useQuery({

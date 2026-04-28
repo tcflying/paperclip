@@ -13,6 +13,7 @@ import { useCompany } from "../context/CompanyContext";
 import { buildProjectWorkspaceSummaries, type ProjectWorkspaceSummary } from "../lib/project-workspaces-tab";
 import { queryKeys } from "../lib/queryKeys";
 import { projectRouteRef } from "../lib/utils";
+import { t } from "../locales";
 
 type ProjectWorkspaceGroup = {
   project: Project;
@@ -103,7 +104,7 @@ export function Workspaces() {
   });
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Workspaces" }]);
+    setBreadcrumbs([{ label: t("nav.workspaces") }]);
   }, [setBreadcrumbs]);
 
   const groups = useMemo(

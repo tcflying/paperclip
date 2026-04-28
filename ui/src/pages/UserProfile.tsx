@@ -21,6 +21,7 @@ import {
   providerDisplayName,
   relativeTime,
 } from "../lib/utils";
+import { t } from "../locales";
 
 const NO_COMPANY = "__none__";
 
@@ -207,7 +208,7 @@ export function UserProfile() {
   });
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Users" }, { label: data?.user.name ?? userSlug }]);
+    setBreadcrumbs([{ label: t("userProfile.title") }, { label: data?.user.name ?? userSlug }]);
   }, [data?.user.name, setBreadcrumbs, userSlug]);
 
   const allTime = data?.stats.find((entry) => entry.key === "all");

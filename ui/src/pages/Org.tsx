@@ -10,6 +10,7 @@ import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { ChevronRight, GitBranch } from "lucide-react";
 import { cn } from "../lib/utils";
+import { t } from "../locales";
 
 function OrgTree({
   nodes,
@@ -94,7 +95,7 @@ export function Org() {
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Org Chart" }]);
+    setBreadcrumbs([{ label: t("nav.orgChart") }]);
   }, [setBreadcrumbs]);
 
   const { data, isLoading, error } = useQuery({

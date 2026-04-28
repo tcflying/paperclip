@@ -12,6 +12,7 @@ import { PageSkeleton } from "../components/PageSkeleton";
 import { formatDate, projectUrl } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Hexagon, Plus } from "lucide-react";
+import { t } from "../locales";
 
 export function Projects() {
   const { selectedCompanyId } = useCompany();
@@ -19,7 +20,7 @@ export function Projects() {
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Projects" }]);
+    setBreadcrumbs([{ label: t("nav.projects") }]);
   }, [setBreadcrumbs]);
 
   const { data: allProjects, isLoading, error } = useQuery({
