@@ -103,35 +103,9 @@ function readNonEmptyString(value: unknown): string | null {
 function summarizeRunFailureForIssueComment(run: LatestIssueRun) {
   if (!run) return null;
 
-<<<<<<< HEAD
-  if (run.status === "succeeded" && run.livenessState) {
-    const stallState = run.livenessState as RunLivenessState;
-    if (STALL_LIVENESS_STATES.has(stallState)) {
-      return ` Last run succeeded with liveness \`${stallState}\` (no concrete progress).`;
-    }
-  }
-
-  const errorCode = readNonEmptyString(run.errorCode)?.trim() ?? null;
-  const rawError = readNonEmptyString(run.error)?.trim() ?? null;
-  const apiMessageMatch = rawError?.match(/"message"\s*:\s*"([^"]+)"/);
-  const firstLine = rawError
-    ?.split(/\r?\n/)
-    .map((line) => line.trim())
-    .find(Boolean) ?? null;
-  const summarySource = apiMessageMatch?.[1] ?? firstLine;
-  const summary =
-    summarySource && summarySource.length > 240
-      ? `${summarySource.slice(0, 237)}...`
-      : summarySource;
-
-  if (errorCode && summary) return ` Latest retry failure: \`${errorCode}\` - ${summary}.`;
-  if (errorCode) return ` Latest retry failure: \`${errorCode}\`.`;
-  if (summary) return ` Latest retry failure: ${summary}.`;
-=======
   if (readNonEmptyString(run.error) || readNonEmptyString(run.errorCode)) {
     return " Latest retry failure details were withheld from the issue thread; inspect the linked run for evidence.";
   }
->>>>>>> upstream/master
   return null;
 }
 
@@ -152,15 +126,6 @@ function didAutomaticRecoveryFail(
     UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES.includes(
       latestRun.status as (typeof UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES)[number],
     )
-  ) {
-    return true;
-  }
-
-  if (
-    isExpectedRecovery &&
-    latestRun.status === "succeeded" &&
-    latestRun.livenessState != null &&
-    STALL_LIVENESS_STATES.has(latestRun.livenessState as RunLivenessState)
   ) {
     return true;
   }
