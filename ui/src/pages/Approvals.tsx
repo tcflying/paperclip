@@ -76,7 +76,7 @@ export function Approvals() {
   ).length;
 
   if (!selectedCompanyId) {
-    return <p className="text-sm text-muted-foreground">Select a company first.</p>;
+    return <p className="text-sm text-muted-foreground">{t("approvals.selectCompanyFirst")}</p>;
   }
 
   if (isLoading) {
@@ -88,7 +88,7 @@ export function Approvals() {
       <div className="flex items-center justify-between">
         <Tabs value={statusFilter} onValueChange={(v) => navigate(`/approvals/${v}`)}>
           <PageTabBar items={[
-            { value: "pending", label: <>Pending{pendingCount > 0 && (
+            { value: "pending", label: <>{t("approvals.pending")}{pendingCount > 0 && (
               <span className={cn(
                 "ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
                 "bg-yellow-500/20 text-yellow-500"
