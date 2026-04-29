@@ -47,6 +47,11 @@ import type { RunLivenessState } from "@paperclipai/shared";
 
 const EXECUTION_PATH_HEARTBEAT_RUN_STATUSES = ["queued", "running", "scheduled_retry"] as const;
 const UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES = ["failed", "cancelled", "timed_out"] as const;
+const STALL_LIVENESS_STATES = new Set<RunLivenessState>([
+  "needs_followup",
+  "empty_response",
+  "plan_only",
+]);
 export const ACTIVE_RUN_OUTPUT_SUSPICION_THRESHOLD_MS = 60 * 60 * 1000;
 export const ACTIVE_RUN_OUTPUT_CRITICAL_THRESHOLD_MS = 4 * 60 * 60 * 1000;
 export const ACTIVE_RUN_OUTPUT_CONTINUE_REARM_MS = 30 * 60 * 1000;
@@ -126,6 +131,15 @@ function didAutomaticRecoveryFail(
     UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES.includes(
       latestRun.status as (typeof UNSUCCESSFUL_HEARTBEAT_RUN_TERMINAL_STATUSES)[number],
     )
+  ) {
+    return true;
+  }
+
+  if (
+    isExpectedRecovery &&
+    latestRun.status === "succeeded" &&
+    latestRun.livenessState != null &&
+    STALL_LIVENESS_STATES.has(latestRun.livenessState as RunLivenessState)
   ) {
     return true;
   }
