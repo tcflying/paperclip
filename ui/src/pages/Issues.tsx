@@ -13,11 +13,8 @@ import { createIssueDetailLocationState } from "../lib/issueDetailBreadcrumb";
 import { EmptyState } from "../components/EmptyState";
 import { IssuesList } from "../components/IssuesList";
 import { CircleDot } from "lucide-react";
-<<<<<<< HEAD
 import { t } from "../locales";
-=======
 import type { Issue } from "@paperclipai/shared";
->>>>>>> upstream/master
 
 const WORKSPACE_FILTER_ISSUE_LIMIT = 1000;
 const ISSUES_PAGE_SIZE = 500;
