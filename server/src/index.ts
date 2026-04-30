@@ -466,14 +466,6 @@ export async function startServer(): Promise<StartedServer> {
     if (config.authBaseUrlMode === "explicit" && !config.authPublicBaseUrl) {
       throw new Error("auth.baseUrlMode=explicit requires auth.publicBaseUrl");
     }
-    if (config.deploymentExposure === "public") {
-      if (config.authBaseUrlMode !== "explicit") {
-        throw new Error("authenticated public exposure requires auth.baseUrlMode=explicit");
-      }
-      if (!config.authPublicBaseUrl) {
-        throw new Error("authenticated public exposure requires auth.publicBaseUrl");
-      }
-    }
   }
 
   const requestedListenPort = config.port;
