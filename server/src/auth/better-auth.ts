@@ -90,6 +90,37 @@ export function deriveAuthTrustedOrigins(config: Config, opts?: { listenPort?: n
   return Array.from(trustedOrigins);
 }
 
+function splitHostHeader(value: string | null): string | null {
+  const firstValue = value?.split(",")[0]?.trim().toLowerCase();
+  return firstValue || null;
+}
+
+export function deriveSameHostRequestOrigin(request: Request | undefined): string[] {
+  if (!request) return [];
+
+  const origin = request.headers.get("origin");
+  if (!origin) return [];
+
+  let originUrl: URL;
+  try {
+    originUrl = new URL(origin);
+  } catch {
+    return [];
+  }
+
+  if (originUrl.protocol !== "http:" && originUrl.protocol !== "https:") {
+    return [];
+  }
+
+  const originHost = originUrl.host.toLowerCase();
+  const requestHosts = [
+    splitHostHeader(request.headers.get("x-forwarded-host")),
+    splitHostHeader(request.headers.get("host")),
+  ].filter((value): value is string => Boolean(value));
+
+  return requestHosts.includes(originHost) ? [originUrl.origin] : [];
+}
+
 export function createBetterAuthInstance(db: Db, config: Config, trustedOrigins: string[]): BetterAuthInstance {
   const baseUrl = config.authBaseUrlMode === "explicit" ? config.authPublicBaseUrl : undefined;
   const secret = process.env.BETTER_AUTH_SECRET ?? process.env.PAPERCLIP_AGENT_JWT_SECRET;
@@ -101,11 +132,21 @@ export function createBetterAuthInstance(db: Db, config: Config, trustedOrigins:
   }
   const publicUrl = process.env.PAPERCLIP_PUBLIC_URL ?? baseUrl;
   const isHttpOnly = publicUrl ? publicUrl.startsWith("http://") : false;
+  const shouldTrustSameHostRequestOrigins =
+    config.deploymentMode === "authenticated" &&
+    config.deploymentExposure === "public" &&
+    config.authBaseUrlMode === "auto";
+  const resolveTrustedOrigins = shouldTrustSameHostRequestOrigins
+    ? (request?: Request) => Array.from(new Set([
+        ...trustedOrigins,
+        ...deriveSameHostRequestOrigin(request),
+      ]))
+    : trustedOrigins;
 
   const authConfig = {
     baseURL: baseUrl,
     secret,
-    trustedOrigins,
+    trustedOrigins: resolveTrustedOrigins,
     database: drizzleAdapter(db, {
       provider: "pg",
       schema: {

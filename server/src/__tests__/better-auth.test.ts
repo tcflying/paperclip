@@ -4,6 +4,7 @@ import { getCookies } from "better-auth/cookies";
 import {
   buildBetterAuthAdvancedOptions,
   deriveAuthCookiePrefix,
+  deriveSameHostRequestOrigin,
   deriveAuthTrustedOrigins,
 } from "../auth/better-auth.js";
 
@@ -74,5 +75,27 @@ describe("Better Auth cookie scoping", () => {
     ]));
     expect(trustedOrigins).not.toContain("https://board.example.test:3100");
     expect(trustedOrigins).not.toContain("http://board.example.test:3100");
+  });
+
+  it("trusts dynamic public origins only when they match the request host", () => {
+    const request = new Request("http://127.0.0.1:3100/api/auth/sign-in/email", {
+      headers: {
+        host: "203.0.113.10:9999",
+        origin: "http://203.0.113.10:9999",
+      },
+    });
+
+    expect(deriveSameHostRequestOrigin(request)).toEqual(["http://203.0.113.10:9999"]);
+  });
+
+  it("rejects dynamic origins that do not match the request host", () => {
+    const request = new Request("http://127.0.0.1:3100/api/auth/sign-in/email", {
+      headers: {
+        host: "203.0.113.10:9999",
+        origin: "https://attacker.example",
+      },
+    });
+
+    expect(deriveSameHostRequestOrigin(request)).toEqual([]);
   });
 });

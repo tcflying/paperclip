@@ -10,7 +10,9 @@ export function readConfigFile(): PaperclipConfig | null {
   try {
     const raw = JSON.parse(fs.readFileSync(configPath, "utf-8"));
     return paperclipConfigSchema.parse(raw);
-  } catch {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn(`[paperclip] Ignoring invalid config file at ${configPath}: ${message}`);
     return null;
   }
 }

@@ -166,21 +166,6 @@ export const paperclipConfigSchema = z
       });
     }
 
-    if (value.server.exposure === "public" && value.auth.baseUrlMode !== "explicit") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "auth.baseUrlMode must be explicit when deploymentMode=authenticated and exposure=public",
-        path: ["auth", "baseUrlMode"],
-      });
-    }
-
-    if (value.server.exposure === "public" && !value.auth.publicBaseUrl) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "auth.publicBaseUrl is required when deploymentMode=authenticated and exposure=public",
-        path: ["auth", "publicBaseUrl"],
-      });
-    }
   });
 
 export type PaperclipConfig = z.infer<typeof paperclipConfigSchema>;

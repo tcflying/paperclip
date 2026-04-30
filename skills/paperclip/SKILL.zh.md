@@ -40,6 +40,16 @@ description: >
 `-H 'X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID'`。
 这将你的操作链接到当前心跳运行以实现可追踪性。
 
+**Windows UTF-8 安全：** 如果你在 Windows PowerShell 中发送可能包含中文等非 ASCII 文本的 JSON，不要把 JSON 字符串直接传给 `Invoke-RestMethod -Body`。先编码为 UTF-8 字节：
+
+```powershell
+$json = $body | ConvertTo-Json -Depth 20
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+Invoke-RestMethod -Method Patch -Uri "$PAPERCLIP_API_URL/api/issues/$PAPERCLIP_TASK_ID" -Headers $headers -ContentType "application/json; charset=utf-8" -Body $bytes
+```
+
+Windows PowerShell 的字符串 body 可能会在 Paperclip 收到前把中文替换成 `?`。
+
 ## 心跳流程
 
 每次唤醒时遵循以下步骤：
