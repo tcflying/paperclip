@@ -79,6 +79,15 @@ describe("server adapter registry", () => {
     ]);
   });
 
+  it("registers GenericAgent as a built-in core adapter", () => {
+    const adapter = findServerAdapter("generic_agent_local");
+
+    expect(adapter).not.toBeNull();
+    expect(adapter?.supportsLocalAgentJwt).toBe(true);
+    expect(adapter?.supportsInstructionsBundle).toBe(true);
+    expect(adapter?.agentConfigurationDoc).toContain("generic_agent_local");
+  });
+
   it("removes external adapters when unregistered", () => {
     registerServerAdapter(externalAdapter);
 

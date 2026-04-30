@@ -55,6 +55,16 @@ import {
   agentConfigurationDoc as openclawGatewayAgentConfigurationDoc,
   models as openclawGatewayModels,
 } from "@paperclipai/adapter-openclaw-gateway";
+import {
+  execute as genericAgentExecute,
+  testEnvironment as genericAgentTestEnvironment,
+  sessionCodec as genericAgentSessionCodec,
+  getConfigSchema as getGenericAgentConfigSchema,
+} from "@paperclipai/adapter-generic-agent-local/server";
+import {
+  agentConfigurationDoc as genericAgentConfigurationDoc,
+  models as genericAgentModels,
+} from "@paperclipai/adapter-generic-agent-local";
 import { listCodexModels, refreshCodexModels } from "./codex-models.js";
 import { listCursorModels } from "./cursor-models.js";
 import {
@@ -198,6 +208,21 @@ const openclawGatewayAdapter: ServerAdapterModule = {
   agentConfigurationDoc: openclawGatewayAgentConfigurationDoc,
 };
 
+const genericAgentLocalAdapter: ServerAdapterModule = {
+  type: "generic_agent_local",
+  execute: genericAgentExecute,
+  testEnvironment: genericAgentTestEnvironment,
+  sessionCodec: genericAgentSessionCodec,
+  sessionManagement: getAdapterSessionManagement("generic_agent_local") ?? undefined,
+  models: genericAgentModels,
+  supportsLocalAgentJwt: true,
+  supportsInstructionsBundle: true,
+  instructionsPathKey: "instructionsFilePath",
+  requiresMaterializedRuntimeSkills: false,
+  agentConfigurationDoc: genericAgentConfigurationDoc,
+  getConfigSchema: getGenericAgentConfigSchema,
+};
+
 const openCodeLocalAdapter: ServerAdapterModule = {
   type: "opencode_local",
   execute: openCodeExecute,
@@ -318,6 +343,7 @@ function registerBuiltInAdapters() {
     cursorLocalAdapter,
     geminiLocalAdapter,
     openclawGatewayAdapter,
+    genericAgentLocalAdapter,
     hermesLocalAdapter,
     processAdapter,
     httpAdapter,

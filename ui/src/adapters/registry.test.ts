@@ -35,6 +35,14 @@ describe("ui adapter registry", () => {
     expect(listUIAdapters().some((adapter) => adapter.type === "external_test")).toBe(true);
   });
 
+  it("registers GenericAgent as a built-in UI adapter", () => {
+    const adapter = findUIAdapter("generic_agent_local");
+
+    expect(adapter).not.toBeNull();
+    expect(adapter?.label).toBe("GenericAgent (local)");
+    expect(listUIAdapters().some((entry) => entry.type === "generic_agent_local")).toBe(true);
+  });
+
   it("falls back to the process parser for unknown types after unregistering", () => {
     registerUIAdapter(externalUIAdapter);
 
